@@ -12,8 +12,19 @@
             "Bryse\\Sora\\": "src"
         }
     },
-    "require": {},
+    "autoload-dev": {
+        "psr-4": {
+            "Bryse\\Sora\\Tests\\": "tests"
+        }
+    },
+    "require": {
+        "phpunit/phpunit": "^8.2"
+    },
     "require-dev": {
-        "larapack/dd": "^1.1"
+        "larapack/dd": "^1.1",
+        "codedungeon/phpunit-result-printer": "^0.26.2"
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit --verbose --colors=always"
     }
 }

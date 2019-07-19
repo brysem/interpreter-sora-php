@@ -1,0 +1,23 @@
+<?php
+
+namespace Bryse\Sora\Tests\Unit;
+
+use PHPUnit\Framework\TestCase;
+use Bryse\Sora\Interpreter;
+
+class FactorialTest extends TestCase
+{
+    /**
+     * @skip
+     *
+     * @return void
+     */
+    public function testFactorialOf5()
+    {
+        $this->markTestSkipped();
+        $sourceCode = file_get_contents(__DIR__ .'/../scripts/factorial5.pp');
+
+        $result = Interpreter::run($sourceCode);
+        $this->assertEquals(120, (int) $result);
+    }
+}
