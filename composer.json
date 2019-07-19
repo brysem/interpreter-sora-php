@@ -1,0 +1,19 @@
+{
+    "name": "brysemeijer/interpreter",
+    "type": "project",
+    "authors": [
+        {
+            "name": "Bryse Meijer",
+            "email": "bryse.meijer@atabix.nl"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Bryse\\Sora\\": "src"
+        }
+    },
+    "require": {},
+    "require-dev": {
+        "larapack/dd": "^1.1"
+    }
+}
