@@ -77,9 +77,9 @@ class Interpreter
      * expr   : factor ((PLUS | MINUS | MULTIPLY | DIVIDE) factor)*
      * factor : INTEGER
      *
-     * @return void
+     * @return int
      */
-    public function expression()
+    public function expression(): int
     {
         $result = $this->factor();
 
@@ -103,6 +103,6 @@ class Interpreter
             }
         }
 
-        return $result;
+        return (int) $result;
     }
 }

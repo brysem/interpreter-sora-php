@@ -1,6 +1,9 @@
 #!/usr/bin/env php
 <?php
+
 use Bryse\Sora\Interpreter;
+use Bryse\Sora\Exceptions\InterpreterException;
+use Bryse\Sora\Exceptions\SyntaxException;
 
 // Composer's autoload.
 require __DIR__ . '/vendor/autoload.php';
@@ -21,6 +24,28 @@ function input()
 function output($val)
 {
     \fputs(STDOUT, $val);
+}
+
+function result($val)
+{
+    output(type($val));
+}
+
+function type($val)
+{
+    $format = "%s";
+
+    switch(gettype($val)) {
+        case 'integer':
+        case 'float':
+        case 'double':
+            $format = color("%s", 'blue');
+            break;
+        default:
+            $format = '"%s"';
+    }
+
+    return sprintf($format, $val);
 }
 
 function color($text = '', $color = null)
@@ -121,6 +146,15 @@ while (true) {
     }
 
     $input = \rtrim($input, "\n");
-    output(Interpreter::run($input));
+    if (empty($input)) {
+        continue;
+    }
+
+    try {
+        result(Interpreter::run($input));
+    } catch(InterpreterException | SyntaxException $e) {
+        output(color($e->getMessage(), 'red'));
+    }
+
     output(PHP_EOL);
 }

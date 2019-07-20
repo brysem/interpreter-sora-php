@@ -9,7 +9,7 @@ class InterpreterException extends RuntimeException
 {
     public function __construct(string $message = null, $code = null, Throwable $previous = null)
     {
-        $this->message = $message ?? 'There was an expected error.';
+        $this->message = $message ?? 'There was an unexpected error.';
         $this->code = $code;
         $this->previous = $previous;
     }

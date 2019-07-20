@@ -32,7 +32,7 @@ class Lexer {
     public function __construct(string $code) {
         $this->code = $code;
         $this->position = 0;
-        $this->currentToken = $this->code[$this->position];
+        $this->currentToken = $this->code[$this->position] ?? null;
     }
 
     /**
@@ -46,7 +46,7 @@ class Lexer {
      */
     public function error($currentChar = null): void
     {
-        throw new SyntaxException($this->code, $currentChar);
+        throw SyntaxException::throw($currentChar, $line = 1, $this->position);
     }
 
     /**
