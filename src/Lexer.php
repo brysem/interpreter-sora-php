@@ -46,7 +46,7 @@ class Lexer {
      */
     public function error($currentChar = null): void
     {
-        throw SyntaxException::throw($currentChar, $line = 1, $this->position);
+        throw SyntaxException::throw($currentChar, $this->getLineNumber(), $this->position);
     }
 
     /**
@@ -155,5 +155,24 @@ class Lexer {
         }
 
         return $this->code[$this->position];
+    }
+
+    protected function getLineNumber()
+    {
+        $position = $this->position;
+        $currentLine = 1;
+        $lines = explode(PHP_EOL, $this->code);
+
+        foreach ($lines as $line) {
+            $length = strlen($line);
+            if ($position > $length) {
+                $position -= $length;
+                $currentLine++;
+            }
+
+            continue;
+        }
+
+        return $currentLine;
     }
 }

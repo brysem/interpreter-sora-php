@@ -37,7 +37,7 @@ class Interpreter
     }
 
     /**
-     * compare the current token type with the passed token
+     * Compare the current token type with the passed token
      * type and if they match then "eat" the current token
      * and assign the next token to the self.current_token,
      * otherwise raise an exception.
@@ -72,6 +72,32 @@ class Interpreter
     }
 
     /**
+     * Returns an INTEGER token value.
+     * term : factor ((MUL | DIV) factor)*
+     *
+     * @return int
+     */
+    public function term() {
+        $result = $this->factor();
+
+        while (in_array($this->currentToken->type(), [Token::MULTIPLY, Token::DIVIDE])) {
+            $token = $this->currentToken;
+            $this->eat($token->type());
+
+            switch ($token->type()) {
+                case Token::MULTIPLY:
+                    $result *= $this->factor();
+                    break;
+                case Token::DIVIDE:
+                    $result /= $this->factor();
+                    break;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * Arithmetic expression parser / interpreter.
      *
      * expr   : factor ((PLUS | MINUS | MULTIPLY | DIVIDE) factor)*
@@ -81,24 +107,18 @@ class Interpreter
      */
     public function expression(): int
     {
-        $result = $this->factor();
+        $result = $this->term();
 
-        while (\in_array($this->currentToken->type(), [Token::PLUS, Token::MINUS, Token::MULTIPLY, Token::DIVIDE])) {
+        while (\in_array($this->currentToken->type(), [Token::PLUS, Token::MINUS])) {
             $token = $this->currentToken;
             $this->eat($token->type());
 
             switch ($token->type()) {
                 case Token::PLUS:
-                    $result += $this->factor();
+                    $result += $this->term();
                     break;
                 case Token::MINUS:
-                    $result -= $this->factor();
-                    break;
-                case Token::MULTIPLY:
-                    $result *= $this->factor();
-                    break;
-                case Token::DIVIDE:
-                    $result /= $this->factor();
+                    $result -= $this->term();
                     break;
             }
         }

@@ -81,6 +81,16 @@ function asi($input)
     return \rtrim($input, "\n;");
 }
 
+if (!empty($input = $argv[1])) {
+    if (substr($input, 0, 2) !== '--') {
+        result(Interpreter::run($input));
+        exit;
+    } else {
+        output(color('Unknown option '. $input). PHP_EOL, 'red');
+        exit;
+    }
+}
+
 output('Sora Version ' . color('0.0.1', 'green') . PHP_EOL);
 output('exit:    Exit the REPL' . PHP_EOL);
 // output('dump:    Perform a vardump()' . PHP_EOL);
