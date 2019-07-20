@@ -30,7 +30,7 @@ class Interpreter
     {
         $this->position += 1;
 
-        if ($this->position > strlen($this->code) - 1) {
+        if ($this->position > \strlen($this->code) - 1) {
             $this->currentToken = null;
 
             return;
@@ -46,7 +46,7 @@ class Interpreter
      */
     protected function skipWhitespace(): void
     {
-        while($this->getCurrentChar() == ' ') {
+        while ($this->getCurrentChar() == ' ') {
             $this->advance();
         }
     }
@@ -60,7 +60,7 @@ class Interpreter
     {
         $integer = '';
 
-        while(is_numeric($this->getCurrentChar())) {
+        while (\is_numeric($this->getCurrentChar())) {
             $integer .= $this->getCurrentChar();
             $this->advance();
         }
@@ -68,50 +68,42 @@ class Interpreter
         return (int) $integer;
     }
 
+    public function term(): int
+    {
+        $token = $this->currentToken;
+        $this->eat(Token::INTEGER);
+
+        return (int) $token->value();
+    }
+
     public function expression()
     {
         // expression -> INTEGER PLUS INTEGER
         // set current token to the first token taken from the input
         $this->currentToken = $this->getNextToken();
+        $result = $this->term();
 
-        // We expect the current token to be an integer
-        $left = $this->currentToken;
-        // dump(['left' => $this->currentToken]);
-        $this->eat(Token::INTEGER);
+        while (\in_array($this->currentToken->type(), [Token::PLUS, Token::MINUS, Token::MULTIPLY, Token::DIVIDE])) {
+            $token = $this->currentToken;
+            $this->eat($token->type());
 
-        // We expect the current token to be either a '+', '-', '*', or '/'
-        $operator = $this->currentToken;
-        // dump(['operator' => $this->currentToken]);
-        $this->eat([Token::PLUS, Token::MINUS, Token::MULTIPLY, Token::DIVIDE]);
-
-        // We expect the current token to be an integer
-        $right = $this->currentToken;
-        // dump(['right' => $this->currentToken]);
-        $this->eat(Token::INTEGER);
-
-        // After the above call the self.current_token is set to
-        // EOF token
-
-        // At this point the INTEGER PLUS INTEGER sequence of tokens
-        // has been successfully found and the method can just
-        // return the result of adding two integers, thus
-        // effectively interpreting client input
-        switch ($operator->type()) {
-            case Token::PLUS:
-                return $left->value() + $right->value();
-            case Token::MINUS:
-                return $left->value() - $right->value();
-            case Token::MULTIPLY:
-                return $left->value() * $right->value();
-            case Token::DIVIDE:
-                if (in_array(0, [$left->value(), $right->value()])) {
-                    $this->error('Division by zero');
-                }
-
-                return $left->value() / $right->value();
-            default:
-                return $this->error();
+            switch ($token->type()) {
+                case Token::PLUS:
+                    $result += $this->term();
+                    break;
+                case Token::MINUS:
+                    $result -= $this->term();
+                    break;
+                case Token::MULTIPLY:
+                    $result *= $this->term();
+                    break;
+                case Token::DIVIDE:
+                    $result /= $this->term();
+                    break;
+            }
         }
+
+        return $result;
     }
 
     public function error($currentChar = null)
@@ -139,7 +131,7 @@ class Interpreter
         ];
 
         $currentChar = $this->getCurrentChar();
-        while($currentChar != null) {
+        while ($currentChar != null) {
             $currentChar = $this->getCurrentChar();
             // dump(['i' => $i, 'pos' => $this->position, 'char' => $currentChar]);
 
@@ -148,12 +140,13 @@ class Interpreter
                 continue;
             }
 
-            if (is_numeric($currentChar)) {
+            if (\is_numeric($currentChar)) {
                 return new Token(Token::INTEGER, $this->integer());
             }
 
-            if (in_array($currentChar, array_keys($operators))) {
+            if (\in_array($currentChar, \array_keys($operators))) {
                 $this->advance();
+
                 return new Token($operators[$currentChar], $currentChar);
             }
 
@@ -191,7 +184,7 @@ class Interpreter
      */
     protected function getCurrentChar(): ?string
     {
-        if ($this->position > strlen($this->code) - 1) {
+        if ($this->position > \strlen($this->code) - 1) {
             return null;
         }
 

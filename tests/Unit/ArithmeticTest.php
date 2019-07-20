@@ -72,4 +72,12 @@ class ArithmeticTest extends TestCase
         $this->assertEquals(100, Interpreter::run('20 * 5'));
         $this->assertEquals(100, Interpreter::run('10  *  10'));
     }
+
+    public function testArbirtrayAmountOfOperators()
+    {
+        $this->assertEquals(18, Interpreter::run('9 - 5 + 3 + 11'));
+        $this->assertEquals(10, Interpreter::run('3 * 5 + 5 - 10'));
+        $this->assertEquals(20, Interpreter::run('10 / 5 + 8 + 10'));
+        $this->assertEquals(80, Interpreter::run('15 + 5 * 3 + 20'));
+    }
 }
