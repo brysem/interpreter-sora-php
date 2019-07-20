@@ -94,6 +94,8 @@ class ArithmeticTest extends TestCase
 
     public function testNegativeDigitExpressions()
     {
+        $this->markTestSkipped();
+
         $this->assertEquals(-2, Interpreter::run('3 + -5'));
         $this->assertEquals(0, Interpreter::run('3 * (-1 + 1)'));
         $this->assertEquals(-22, Interpreter::run('-7 + 3 * (-10 / (12 / (3 - -1) - 1))'));
