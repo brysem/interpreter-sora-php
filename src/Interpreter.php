@@ -14,15 +14,58 @@ class Interpreter
     {
         $this->code = $code;
         $this->position = 0;
-        $this->currentToken = null;
+        $this->currentToken = $this->code[0];
     }
 
     public static function run(string $code)
     {
-        $interpreter = new Interpreter($code);
+        $interpreter = new self($code);
+        // dump(['code' => $code]);
         $result = $interpreter->expression();
 
         return $result;
+    }
+
+    protected function advance()
+    {
+        $this->position += 1;
+
+        if ($this->position > strlen($this->code) - 1) {
+            $this->currentToken = null;
+
+            return;
+        }
+
+        $this->currentToken = $this->code[$this->position];
+    }
+
+    /**
+     * Skips the interpreter input to the next non-whitespace.
+     *
+     * @return void
+     */
+    protected function skipWhitespace(): void
+    {
+        while($this->getCurrentChar() == ' ') {
+            $this->advance();
+        }
+    }
+
+    /**
+     * Return a (multidigit) integer consumed from the input.
+     *
+     * @return int
+     */
+    protected function integer(): int
+    {
+        $integer = '';
+
+        while(is_numeric($this->getCurrentChar())) {
+            $integer .= $this->getCurrentChar();
+            $this->advance();
+        }
+
+        return (int) $integer;
     }
 
     public function expression()
@@ -31,48 +74,29 @@ class Interpreter
         // set current token to the first token taken from the input
         $this->currentToken = $this->getNextToken();
 
-        $left = null;
-        $operator = null;
-        $right = null;
-        while($this->currentToken->type() != Token::EOF) {
-            if ($this->currentToken->type() == Token::WHITESPACE) {
-                $this->eat(Token::WHITESPACE);
-                continue;
-            }
+        // We expect the current token to be an integer
+        $left = $this->currentToken;
+        // dump(['left' => $this->currentToken]);
+        $this->eat(Token::INTEGER);
 
-            if ($this->currentToken->type() == Token::INTEGER && ! $operator) {
-                $left = $left
-                    ? new Token(Token::INTEGER, (string) $left->value() . (string) $this->currentToken->value())
-                    : $this->currentToken;
+        // We expect the current token to be either a '+', '-', '*', or '/'
+        $operator = $this->currentToken;
+        // dump(['operator' => $this->currentToken]);
+        $this->eat([Token::PLUS, Token::MINUS, Token::MULTIPLY, Token::DIVIDE]);
 
-                $this->eat(Token::INTEGER);
-                continue;
-            }
+        // We expect the current token to be an integer
+        $right = $this->currentToken;
+        // dump(['right' => $this->currentToken]);
+        $this->eat(Token::INTEGER);
 
-            if ($this->currentToken->type() != Token::INTEGER && $left) {
-                $operator = $this->currentToken;
-                $this->eat([Token::PLUS, Token::MINUS, Token::MULTIPLY, Token::DIVIDE]);
-                continue;
-            }
-
-            if ($this->currentToken->type() == Token::INTEGER && $operator) {
-                $right = $right
-                    ? new Token(Token::INTEGER, (string) $right->value() . (string) $this->currentToken->value())
-                    : $this->currentToken;
-
-                $this->eat(Token::INTEGER);
-                continue;
-            }
-        }
-
-        // after the above call the self.current_token is set to
+        // After the above call the self.current_token is set to
         // EOF token
 
-        // at this point INTEGER PLUS INTEGER sequence of tokens
+        // At this point the INTEGER PLUS INTEGER sequence of tokens
         // has been successfully found and the method can just
         // return the result of adding two integers, thus
         // effectively interpreting client input
-        switch($operator->type()) {
+        switch ($operator->type()) {
             case Token::PLUS:
                 return $left->value() + $right->value();
             case Token::MINUS:
@@ -80,6 +104,10 @@ class Interpreter
             case Token::MULTIPLY:
                 return $left->value() * $right->value();
             case Token::DIVIDE:
+                if (in_array(0, [$left->value(), $right->value()])) {
+                    $this->error('Division by zero');
+                }
+
                 return $left->value() / $right->value();
             default:
                 return $this->error();
@@ -100,65 +128,39 @@ class Interpreter
      */
     public function getNextToken()
     {
-        // If position is past the end of the last char in the code,
-        // we will then return the EOF token because there is
-        // no more input left to convert into tokens.
-        if ($this->position > strlen($this->code) - 1) {
-            return new Token(Token::EOF, null);
+        static $i = 0;
+        $i++;
+
+        $operators = [
+            '+' => Token::PLUS,
+            '-' => Token::MINUS,
+            '/' => Token::DIVIDE,
+            '*' => Token::MULTIPLY,
+        ];
+
+        $currentChar = $this->getCurrentChar();
+        while($currentChar != null) {
+            $currentChar = $this->getCurrentChar();
+            // dump(['i' => $i, 'pos' => $this->position, 'char' => $currentChar]);
+
+            if ($currentChar == ' ') {
+                $this->skipWhitespace();
+                continue;
+            }
+
+            if (is_numeric($currentChar)) {
+                return new Token(Token::INTEGER, $this->integer());
+            }
+
+            if (in_array($currentChar, array_keys($operators))) {
+                $this->advance();
+                return new Token($operators[$currentChar], $currentChar);
+            }
+
+            $this->error($currentChar);
         }
 
-        // get a character at the position self.pos and decide
-        // what token to create based on the single character
-        $currentChar = substr($this->code, $this->position, 1);
-
-        // if the character is an empty whitespace we should skip
-        if ($currentChar == " ") {
-            $token = new Token(Token::WHITESPACE, $currentChar);
-            $this->position++;
-
-            return $token;
-        }
-
-        // if the character is a digit then convert it to
-        // integer, create an INTEGER token, increment self.pos
-        // index to point to the next character after the digit,
-        // and return the INTEGER token
-        if (is_numeric($currentChar)) {
-            $token = new Token(Token::INTEGER, $currentChar);
-            $this->position++;
-
-            return $token;
-        }
-
-        if ($currentChar == '+') {
-            $token = new Token(Token::PLUS, $currentChar);
-            $this->position++;
-
-            return $token;
-        }
-
-        if ($currentChar == '-') {
-            $token = new Token(Token::MINUS, $currentChar);
-            $this->position++;
-
-            return $token;
-        }
-
-        if ($currentChar == '*') {
-            $token = new Token(Token::MULTIPLY, $currentChar);
-            $this->position++;
-
-            return $token;
-        }
-
-        if ($currentChar == '/') {
-            $token = new Token(Token::DIVIDE, $currentChar);
-            $this->position++;
-
-            return $token;
-        }
-
-        $this->error($currentChar);
+        return new Token(Token::EOF, null);
     }
 
     /**
@@ -168,16 +170,31 @@ class Interpreter
      * otherwise raise an exception.
      *
      * @param string|array $tokenType
+     *
      * @return void
      */
     public function eat($tokenType)
     {
-        $tokenType = ! is_array($tokenType) ? [$tokenType] : $tokenType;
+        $tokenType = ! \is_array($tokenType) ? [$tokenType] : $tokenType;
 
-        if (! in_array($this->currentToken->type(), $tokenType)) {
+        if (! \in_array($this->currentToken->type(), $tokenType)) {
             $this->error();
         }
 
         $this->currentToken = $this->getNextToken();
+    }
+
+    /**
+     * Retrieves the character for the current position of the interpreter.
+     *
+     * @return string|null
+     */
+    protected function getCurrentChar(): ?string
+    {
+        if ($this->position > strlen($this->code) - 1) {
+            return null;
+        }
+
+        return $this->code[$this->position];
     }
 }
