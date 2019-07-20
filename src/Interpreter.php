@@ -59,21 +59,31 @@ class Interpreter
 
     /**
      * Returns an INTEGER token value.
-     * factor : INTEGER
+     * factor : INTEGER | LEFT_PARENTHESIS expr RIGHT_PARENTHESIS
      *
      * @return int
      */
     public function factor(): int
     {
         $token = $this->currentToken;
-        $this->eat(Token::INTEGER);
 
-        return (int) $token->value();
+        if ($token->type() == Token::INTEGER) {
+            $this->eat(Token::INTEGER);
+
+            return (int) $token->value();
+        }
+
+        if (in_array($token->type(), [Token::LEFT_PARENTHESIS, Token::RIGHT_PARENTHESIS])) {
+            $this->eat(Token::LEFT_PARENTHESIS);
+            $result = $this->expression();
+            $this->eat(Token::RIGHT_PARENTHESIS);
+            return $result;
+        }
     }
 
     /**
      * Returns an INTEGER token value.
-     * term : factor ((MUL | DIV) factor)*
+     * term : factor ((MULTIPLY | DIVIDE) factor)*
      *
      * @return int
      */
@@ -100,8 +110,9 @@ class Interpreter
     /**
      * Arithmetic expression parser / interpreter.
      *
-     * expr   : factor ((PLUS | MINUS | MULTIPLY | DIVIDE) factor)*
-     * factor : INTEGER
+     * expr   : term ((PLUS | MINUS) term)*
+     * term   : factor ((MULTIPLY | DIVIDE) factor)*
+     * factor : INTEGER | LEFT_PARENTHESIS expr RIGHT_PARENTHESIS
      *
      * @return int
      */

@@ -10,6 +10,8 @@ class Token
     const MULTIPLY = 'MULTIPLY';
     const DIVIDE = 'DIVIDE';
     const WHITESPACE = 'WHITESPACE';
+    const LEFT_PARENTHESIS = 'LEFT_PARENTHESIS';
+    const RIGHT_PARENTHESIS = 'RIGHT_PARENTHESIS';
     const EOF = 'EOF';
 
     protected $type;

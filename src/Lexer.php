@@ -117,6 +117,11 @@ class Lexer {
             '*' => Token::MULTIPLY,
         ];
 
+        $parenthesis = [
+            '(' => Token::LEFT_PARENTHESIS,
+            ')' => Token::RIGHT_PARENTHESIS,
+        ];
+
         $currentChar = $this->getCurrentChar();
         while ($currentChar != null) {
             $currentChar = $this->getCurrentChar();
@@ -135,6 +140,12 @@ class Lexer {
                 $this->advance();
 
                 return new Token($operators[$currentChar], $currentChar);
+            }
+
+            if (\in_array($currentChar, \array_keys($parenthesis))) {
+                $this->advance();
+
+                return new Token($parenthesis[$currentChar], $currentChar);
             }
 
             $this->error($currentChar);

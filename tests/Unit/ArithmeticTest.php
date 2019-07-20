@@ -81,4 +81,12 @@ class ArithmeticTest extends TestCase
         $this->assertEquals(17, Interpreter::run('14 + 2 * 3 - 6 / 2'));
         $this->assertEquals(50, Interpreter::run('15 + 5 * 3 + 20'));
     }
+
+    public function testNestedExpressions()
+    {
+        $this->assertEquals(2, Interpreter::run('(1 + 1)'));
+        $this->assertEquals(6, Interpreter::run('3 * (1 + 1)'));
+        $this->assertEquals(12, Interpreter::run('(1 + 1) / 2 * (6 * 2)'));
+        $this->assertEquals(22, Interpreter::run('7 + 3 * (10 / (12 / (3 + 1) - 1))'));
+    }
 }

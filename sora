@@ -81,14 +81,23 @@ function asi($input)
     return \rtrim($input, "\n;");
 }
 
+function run($input)
+{
+    try {
+        result(Interpreter::run($input));
+    } catch(InterpreterException | SyntaxException $e) {
+        output(color($e->getMessage(), 'red'));
+    }
+}
+
 if (!empty($input = $argv[1])) {
     if (substr($input, 0, 2) !== '--') {
-        result(Interpreter::run($input));
-        exit;
+        run($input);
     } else {
         output(color('Unknown option '. $input). PHP_EOL, 'red');
-        exit;
     }
+    output(PHP_EOL);
+    exit;
 }
 
 output('Sora Version ' . color('0.0.1', 'green') . PHP_EOL);
@@ -160,11 +169,7 @@ while (true) {
         continue;
     }
 
-    try {
-        result(Interpreter::run($input));
-    } catch(InterpreterException | SyntaxException $e) {
-        output(color($e->getMessage(), 'red'));
-    }
+    run($input);
 
     output(PHP_EOL);
 }
