@@ -59,7 +59,7 @@ class Interpreter
 
     /**
      * Returns an INTEGER token value.
-     * factor : INTEGER | LEFT_PARENTHESIS expr RIGHT_PARENTHESIS
+     * factor : INTEGER | LEFT_PARENTHESIS expr RIGHT_PARENTHESIS.
      *
      * @return int
      */
@@ -73,24 +73,32 @@ class Interpreter
             return (int) $token->value();
         }
 
-        if (in_array($token->type(), [Token::LEFT_PARENTHESIS, Token::RIGHT_PARENTHESIS])) {
+        if ($token->type() == Token::MINUS) {
+            $this->eat(Token::MINUS);
+
+            return -1 * $this->factor();
+        }
+
+        if (\in_array($token->type(), [Token::LEFT_PARENTHESIS, Token::RIGHT_PARENTHESIS])) {
             $this->eat(Token::LEFT_PARENTHESIS);
             $result = $this->expression();
             $this->eat(Token::RIGHT_PARENTHESIS);
+
             return $result;
         }
     }
 
     /**
      * Returns an INTEGER token value.
-     * term : factor ((MULTIPLY | DIVIDE) factor)*
+     * term : factor ((MULTIPLY | DIVIDE) factor)*.
      *
      * @return int
      */
-    public function term() {
+    public function term()
+    {
         $result = $this->factor();
 
-        while (in_array($this->currentToken->type(), [Token::MULTIPLY, Token::DIVIDE])) {
+        while (\in_array($this->currentToken->type(), [Token::MULTIPLY, Token::DIVIDE])) {
             $token = $this->currentToken;
             $this->eat($token->type());
 

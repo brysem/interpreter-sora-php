@@ -2,8 +2,8 @@
 
 namespace Bryse\Sora\Tests\Unit;
 
-use PHPUnit\Framework\TestCase;
 use Bryse\Sora\Interpreter;
+use PHPUnit\Framework\TestCase;
 
 class ArithmeticTest extends TestCase
 {
@@ -90,5 +90,12 @@ class ArithmeticTest extends TestCase
         $this->assertEquals(22, Interpreter::run('7 + 3 * (10 / (12 / (3 + 1) - 1))'));
         $this->assertEquals(10, Interpreter::run('7 + 3 * (10 / (12 / (3 + 1) - 1)) / (2 + 3) - 5 - 3 + (8)'));
         $this->assertEquals(12, Interpreter::run('7 + (((3 + 2)))'));
+    }
+
+    public function testNegativeDigitExpressions()
+    {
+        $this->assertEquals(-2, Interpreter::run('3 + -5'));
+        $this->assertEquals(0, Interpreter::run('3 * (-1 + 1)'));
+        $this->assertEquals(-22, Interpreter::run('-7 + 3 * (-10 / (12 / (3 - -1) - 1))'));
     }
 }
