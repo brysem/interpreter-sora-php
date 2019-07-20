@@ -7,6 +7,7 @@ use Bryse\Sora\Parser\NodeVisitor;
 use Bryse\Sora\Parser\BinaryOperator;
 use Bryse\Sora\Parser\Number;
 use Bryse\Sora\Parser\Parser;
+use Bryse\Sora\Parser\UnaryOperator;
 
 class Interpreter extends NodeVisitor
 {
@@ -54,6 +55,18 @@ class Interpreter extends NodeVisitor
                 return $left * $right;
             case Token::DIVIDE:
                 return $left / $right;
+        }
+    }
+
+    public function visitUnaryOperator(UnaryOperator $node)
+    {
+        $value = $this->visit($node->expression());
+
+        switch($node->token()->type()) {
+            case Token::PLUS:
+                return +$value;
+            case Token::MINUS:
+                return -$value;
         }
     }
 

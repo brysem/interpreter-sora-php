@@ -92,12 +92,15 @@ class ArithmeticTest extends TestCase
         $this->assertEquals(12, Interpreter::run('7 + (((3 + 2)))'));
     }
 
-    public function testNegativeDigitExpressions()
+    public function testUnaryExpressions()
     {
-        $this->markTestSkipped();
-
+        $this->assertEquals(-3, Interpreter::run('-3'));
+        $this->assertEquals(3, Interpreter::run('+3'));
+        $this->assertEquals(8, Interpreter::run('5 - - - + - 3'));
+        $this->assertEquals(10, Interpreter::run('5 - - - + - (3 + 4) - +2'));
         $this->assertEquals(-2, Interpreter::run('3 + -5'));
         $this->assertEquals(0, Interpreter::run('3 * (-1 + 1)'));
         $this->assertEquals(-22, Interpreter::run('-7 + 3 * (-10 / (12 / (3 - -1) - 1))'));
+        $this->assertEquals(4, Interpreter::run('(-5*3)-4/2*3+(5*(2+3))'));
     }
 }

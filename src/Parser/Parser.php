@@ -58,13 +58,18 @@ class Parser
 
     /**
      * Returns an INTEGER token value.
-     * factor : INTEGER | LEFT_PARENTHESIS expr RIGHT_PARENTHESIS.
+     * factor : (PLUS|MINUS)factor | INTEGER | LEFT_PARENTHESIS expr RIGHT_PARENTHESIS
      *
      * @return int
      */
     public function factor(): Node
     {
         $token = $this->currentToken;
+
+        if (in_array($token->type(), [Token::PLUS, Token::MINUS])) {
+            $this->eat($token->type());
+            return new UnaryOperator($token, $this->factor());
+        }
 
         if ($token->type() == Token::INTEGER) {
             $this->eat(Token::INTEGER);
@@ -85,7 +90,7 @@ class Parser
 
     /**
      * Returns an INTEGER token value.
-     * term : factor ((MULTIPLY | DIVIDE) factor)*.
+     * term : factor ((MULTIPLY | DIVIDE) factor)*
      *
      * @return Node
      */
@@ -107,7 +112,7 @@ class Parser
      *
      * expr   : term ((PLUS | MINUS) term)*
      * term   : factor ((MULTIPLY | DIVIDE) factor)*
-     * factor : INTEGER | LEFT_PARENTHESIS expr RIGHT_PARENTHESIS
+     * factor : (PLUS|MINUS)factor | INTEGER | LEFT_PARENTHESIS expr RIGHT_PARENTHESIS
      *
      * @return Node
      */
