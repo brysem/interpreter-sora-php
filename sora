@@ -90,7 +90,7 @@ function run($input)
     }
 }
 
-if (!empty($input = $argv[1])) {
+if (!empty($input = $argv[1] ?? null)) {
     if (substr($input, 0, 2) !== '--') {
         run($input);
     } else {

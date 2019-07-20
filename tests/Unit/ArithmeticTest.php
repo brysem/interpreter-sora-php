@@ -88,5 +88,7 @@ class ArithmeticTest extends TestCase
         $this->assertEquals(6, Interpreter::run('3 * (1 + 1)'));
         $this->assertEquals(12, Interpreter::run('(1 + 1) / 2 * (6 * 2)'));
         $this->assertEquals(22, Interpreter::run('7 + 3 * (10 / (12 / (3 + 1) - 1))'));
+        $this->assertEquals(10, Interpreter::run('7 + 3 * (10 / (12 / (3 + 1) - 1)) / (2 + 3) - 5 - 3 + (8)'));
+        $this->assertEquals(12, Interpreter::run('7 + (((3 + 2)))'));
     }
 }
