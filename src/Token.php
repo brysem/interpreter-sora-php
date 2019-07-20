@@ -26,6 +26,13 @@ class Token
         return $this->type;
     }
 
+    /**
+     * Returns the value of the token.
+     * Provide a value to update the current value and return it.
+     *
+     * @param mixed $value
+     * @return mixed
+     */
     public function value($value = null)
     {
         if (! is_null($value)) {
