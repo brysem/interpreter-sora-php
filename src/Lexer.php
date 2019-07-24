@@ -81,11 +81,11 @@ class Lexer
         $result = '';
         $currentChar = $this->getCurrentChar();
 
-        while(! is_null($currentChar) && ctype_alnum($currentChar)) {
-            $currentChar = $this->getCurrentChar();
-
+        while (! \is_null($currentChar) && $currentChar != ' ' && \ctype_alnum($currentChar)) {
             $result .= $currentChar;
             $this->advance();
+
+            $currentChar = $this->getCurrentChar();
         }
 
         $token = Arr::get(
@@ -97,7 +97,6 @@ class Lexer
         return $token;
     }
 
-
     /**
      * Advances $this->position and sets the $this->currentToken variable.
      *
@@ -105,7 +104,7 @@ class Lexer
      */
     protected function advance($amount = 1)
     {
-        for ($i=0; $i < $amount; $i++) {
+        for ($i = 0; $i < $amount; $i++) {
             $this->position += 1;
 
             if ($this->position > \strlen($this->code) - 1) {
@@ -189,13 +188,26 @@ class Lexer
                 return new Token(Token::INTEGER, $this->integer());
             }
 
-            if (ctype_alnum($currentChar)) {
+            if (\ctype_alnum($currentChar)) {
                 return $this->id();
             }
 
             if ($currentChar == ':' && $this->peek() == '=') {
-                // @TODO continue variable assignment
+                $this->advance(2);
+
+                return new Token(Token::ASSIGNMENT, ':=');
+            }
+
+            if ($currentChar == ';') {
                 $this->advance();
+
+                return new Token(Token::SEMICOLON, $currentChar);
+            }
+
+            if ($currentChar == '.') {
+                $this->advance();
+
+                return new Token(Token::DOT, $currentChar);
             }
 
             if (\in_array($currentChar, \array_keys($this->operators))) {

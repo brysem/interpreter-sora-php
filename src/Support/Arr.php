@@ -7,7 +7,7 @@ class Arr
     public static function get(array $array, $key, $default = null)
     {
         if (isset($array[$key])) {
-            return $key;
+            return $array[$key];
         }
 
         return $default;

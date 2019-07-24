@@ -12,6 +12,9 @@ class Token
     const WHITESPACE = 'WHITESPACE';
     const LEFT_PARENTHESIS = 'LEFT_PARENTHESIS';
     const RIGHT_PARENTHESIS = 'RIGHT_PARENTHESIS';
+    const ASSIGNMENT = ':=';
+    const SEMICOLON = ';';
+    const DOT = '.';
     const EOF = 'EOF';
 
     protected $type;
@@ -33,11 +36,12 @@ class Token
      * Provide a value to update the current value and return it.
      *
      * @param mixed $value
+     *
      * @return mixed
      */
     public function value($value = null)
     {
-        if (! is_null($value)) {
+        if (! \is_null($value)) {
             $this->value = $value;
         }
 
@@ -46,7 +50,7 @@ class Token
 
     protected function cast(string $type, $value)
     {
-        switch($type) {
+        switch ($type) {
             case self::INTEGER:
                 return (int) $value;
             default:
