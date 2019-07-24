@@ -58,7 +58,7 @@ class Parser
 
     /**
      * Returns an INTEGER token value.
-     * factor : (PLUS|MINUS)factor | INTEGER | LEFT_PARENTHESIS expr RIGHT_PARENTHESIS
+     * factor : (PLUS|MINUS)factor | INTEGER | LEFT_PARENTHESIS expr RIGHT_PARENTHESIS.
      *
      * @return int
      */
@@ -66,8 +66,9 @@ class Parser
     {
         $token = $this->currentToken;
 
-        if (in_array($token->type(), [Token::PLUS, Token::MINUS])) {
+        if (\in_array($token->type(), [Token::PLUS, Token::MINUS])) {
             $this->eat($token->type());
+
             return new UnaryOperator($token, $this->factor());
         }
 
@@ -90,7 +91,7 @@ class Parser
 
     /**
      * Returns an INTEGER token value.
-     * term : factor ((MULTIPLY | DIVIDE) factor)*
+     * term : factor ((MULTIPLY | DIVIDE) factor)*.
      *
      * @return Node
      */
@@ -125,6 +126,34 @@ class Parser
             $this->eat($token->type());
             $node = new BinaryOperator($node, $token, $this->term());
         }
+
+        return $node;
+    }
+
+    /**
+     * ompound_statement: BEGIN statement_list END.
+     *
+     * @return Node
+     */
+    public function compoundStatement(): Node
+    {
+        $this->eat(Token::BEGIN);
+        $nodes = $this->statementList();
+        $this->eat(Token::END);
+
+        // @TODO FINISH
+        return new Node();
+    }
+
+    /**
+     * program : compound_statement DOT.
+     *
+     * @return Node
+     */
+    public function program(): Node
+    {
+        $node = $this->compoundStatement();
+        $this->eat(Token::DOT);
 
         return $node;
     }
