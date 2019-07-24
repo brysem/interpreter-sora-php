@@ -1,10 +1,10 @@
 <?php
 
-namespace Bryse\Sora\Parser;
+namespace Bryse\Sora\Parser\Nodes;
 
 use Bryse\Sora\Token;
 
-class BinaryOperator extends Node
+class Assignment extends Node
 {
     protected $left;
     protected $token;
@@ -26,5 +26,10 @@ class BinaryOperator extends Node
     public function right(): Node
     {
         return $this->right;
+    }
+
+    public function operator(): Token
+    {
+        return $this->token();
     }
 }

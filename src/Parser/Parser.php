@@ -5,6 +5,14 @@ namespace Bryse\Sora\Parser;
 use Bryse\Sora\Exceptions\InterpreterException;
 use Bryse\Sora\Lexer;
 use Bryse\Sora\Token;
+use Bryse\Sora\Parser\Nodes\Number;
+use Bryse\Sora\Parser\Nodes\UnaryOperator;
+use Bryse\Sora\Parser\Nodes\BinaryOperator;
+use Bryse\Sora\Parser\Nodes\Node;
+use Bryse\Sora\Parser\Nodes\NoOperation;
+use Bryse\Sora\Parser\Nodes\Variable;
+use Bryse\Sora\Parser\Nodes\Assignment;
+use Bryse\Sora\Parser\Nodes\Compound;
 
 class Parser
 {
@@ -25,12 +33,16 @@ class Parser
 
     public function parse(): Node
     {
-        $tree = $this->expression();
+        $tree = $this->program();
+
+        if ($this->currentToken->type() != Token::EOF) {
+            $this->error();
+        }
 
         return $tree;
     }
 
-    public function error()
+    protected function error()
     {
         throw new InterpreterException('Invalid syntax');
     }
@@ -45,7 +57,7 @@ class Parser
      *
      * @return void
      */
-    public function eat($tokenType)
+    protected function eat($tokenType)
     {
         $tokenType = ! \is_array($tokenType) ? [$tokenType] : $tokenType;
 
@@ -58,11 +70,11 @@ class Parser
 
     /**
      * Returns an INTEGER token value.
-     * factor : (PLUS|MINUS)factor | INTEGER | LEFT_PARENTHESIS expr RIGHT_PARENTHESIS.
+     * factor : (PLUS|MINUS)factor | INTEGER | LEFT_PARENTHESIS expr RIGHT_PARENTHESIS. | variable
      *
      * @return int
      */
-    public function factor(): Node
+    protected function factor(): Node
     {
         $token = $this->currentToken;
 
@@ -86,6 +98,10 @@ class Parser
             return $node;
         }
 
+        if ($token->type() == Token::ID) {
+            return $this->variable();
+        }
+
         $this->error();
     }
 
@@ -95,7 +111,7 @@ class Parser
      *
      * @return Node
      */
-    public function term(): Node
+    protected function term(): Node
     {
         $node = $this->factor();
 
@@ -117,7 +133,7 @@ class Parser
      *
      * @return Node
      */
-    public function expression(): Node
+    protected function expression(): Node
     {
         $node = $this->term();
 
@@ -131,26 +147,105 @@ class Parser
     }
 
     /**
-     * ompound_statement: BEGIN statement_list END.
+     * An empty production
      *
      * @return Node
      */
-    public function compoundStatement(): Node
+    protected function empty(): Node
+    {
+        return new NoOperation();
+    }
+
+    /**
+     * variable : ID
+     *
+     * @return Node
+     */
+    protected function variable(): Node
+    {
+        $node = new Variable($this->currentToken);
+        $this->eat(Token::ID);
+
+        return $node;
+    }
+
+    /**
+     * assignment_statement : variable ASSIGN expr
+     *
+     * @return Node
+     */
+    protected function assignmentStatement(): Node
+    {
+        $left = $this->variable();
+        $token = $this->currentToken;
+        $this->eat(Token::ASSIGNMENT);
+        $right = $this->expression();
+
+        return new Assignment($left, $token, $right);
+    }
+
+    /**
+    * statement : compound_statement | assignment_statement | empty
+     *
+     * @return Node
+     */
+    protected function statement(): Node
+    {
+        if ($this->currentToken->type() == Token::BEGIN) {
+            return $this->compoundStatement();
+        }
+
+        if ($this->currentToken->type() == Token::ID) {
+            return $this->assignmentStatement();
+        }
+
+        return $this->empty();
+    }
+
+    /**
+     *     statement_list : statement | statement SEMI statement_list
+     *
+     * @return Node[]
+     */
+    protected function statementList(): array
+    {
+        $node = $this->statement();
+        $results = [$node];
+
+        while ($this->currentToken->type() == Token::SEMICOLON) {
+            $this->eat(Token::SEMICOLON);
+            $results[] = $this->statement();
+        }
+
+        if ($this->currentToken->type() == Token::ID) {
+            $this->error();
+        }
+
+        return $results;
+    }
+
+    /**
+     * compound_statement: BEGIN statement_list END.
+     *
+     * @return Node
+     */
+    protected function compoundStatement(): Node
     {
         $this->eat(Token::BEGIN);
         $nodes = $this->statementList();
         $this->eat(Token::END);
 
-        // @TODO FINISH
-        return new Node();
+        $root = new Compound($nodes);
+
+        return $root;
     }
 
     /**
-     * program : compound_statement DOT.
+     * program : compound_statement DOT
      *
      * @return Node
      */
-    public function program(): Node
+    protected function program(): Node
     {
         $node = $this->compoundStatement();
         $this->eat(Token::DOT);

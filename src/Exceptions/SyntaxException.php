@@ -4,6 +4,7 @@ namespace Bryse\Sora\Exceptions;
 
 use RuntimeException;
 use Throwable;
+use Bryse\Sora\Parser\Position;
 
 class SyntaxException extends RuntimeException
 {
@@ -21,12 +22,30 @@ class SyntaxException extends RuntimeException
         $this->previous = $previous;
     }
 
-    public static function throw(string $currentChar = null, int $line = 1, int $position = 0)
+    public static function throw(string $currentChar = null, Position $position)
     {
-        $message = is_null($currentChar)
-            ? 'Error parsing input'
-            : sprintf("Parse error: syntax error, unexpected '%s' in sora shell code on line %s:%s", $currentChar, $line, $position);
+        if (is_null($currentChar)) {
+            new static('Error parsing input');
+        }
 
-        return new static($message);
+        $message = [
+            'Parse error: syntax error;',
+            '  %s',
+            "unexpected '%s' in sora code on line %s:%s"
+        ];
+
+        $currentLine = $position->line();
+        $line = $position->lineNumber();
+        $relativePosition = $position->relative();
+
+        $currentLine = trim($currentLine);
+        $currentChar = self::normalizeChar($currentChar);
+
+        return new static(sprintf(implode(PHP_EOL, $message), $currentLine, $currentChar, $line, $relativePosition));
+    }
+
+    protected static function normalizeChar(string $char = null)
+    {
+        return str_replace("\n", '\n', $char);
     }
 }

@@ -2,12 +2,11 @@
 
 namespace Bryse\Sora;
 
-use Bryse\Sora\Exceptions\InterpreterException;
-use Bryse\Sora\Parser\NodeVisitor;
-use Bryse\Sora\Parser\BinaryOperator;
-use Bryse\Sora\Parser\Number;
+use Bryse\Sora\Parser\Nodes\NodeVisitor;
+use Bryse\Sora\Parser\Nodes\BinaryOperator;
+use Bryse\Sora\Parser\Nodes\Number;
 use Bryse\Sora\Parser\Parser;
-use Bryse\Sora\Parser\UnaryOperator;
+use Bryse\Sora\Parser\Nodes\UnaryOperator;
 
 class Interpreter extends NodeVisitor
 {

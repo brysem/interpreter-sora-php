@@ -1,6 +1,6 @@
 <?php
 
-namespace Bryse\Sora\Parser;
+namespace Bryse\Sora\Parser\Nodes;
 
 use Bryse\Sora\Token;
 
@@ -19,5 +19,10 @@ class UnaryOperator extends Node
     public function expression(): Node
     {
         return $this->expression;
+    }
+
+    public function operator(): Token
+    {
+        return $this->token();
     }
 }

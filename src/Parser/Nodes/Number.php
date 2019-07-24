@@ -1,10 +1,10 @@
 <?php
 
-namespace Bryse\Sora\Parser;
+namespace Bryse\Sora\Parser\Nodes;
 
 use Bryse\Sora\Token;
 
-class Variable extends Node
+class Number extends Node
 {
     /**
      * The token instance.

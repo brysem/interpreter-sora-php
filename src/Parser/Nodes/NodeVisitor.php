@@ -1,6 +1,6 @@
 <?php
 
-namespace Bryse\Sora\Parser;
+namespace Bryse\Sora\Parser\Nodes;
 
 use Exception;
 

@@ -4,6 +4,7 @@ namespace Bryse\Sora;
 
 use Bryse\Sora\Exceptions\SyntaxException;
 use Bryse\Sora\Support\Arr;
+use Bryse\Sora\Parser\Position;
 
 class Lexer
 {
@@ -68,7 +69,7 @@ class Lexer
      */
     public function error($currentChar = null): void
     {
-        throw SyntaxException::throw($currentChar, $this->getLineNumber(), $this->position);
+        throw SyntaxException::throw($currentChar, $this->getPosition());
     }
 
     /**
@@ -91,7 +92,7 @@ class Lexer
         $token = Arr::get(
             $this->reservedKeywords,
             $result,
-            new Token('ID', $result)
+            new Token(Token::ID, $result)
         );
 
         return $token;
@@ -124,7 +125,7 @@ class Lexer
      */
     protected function skipWhitespace(): void
     {
-        while ($this->getCurrentChar() == ' ') {
+        while ($this->getCurrentChar() == ' ' || $this->getCurrentChar() == PHP_EOL) {
             $this->advance();
         }
     }
@@ -176,10 +177,11 @@ class Lexer
 
         $currentChar = $this->getCurrentChar();
         while ($currentChar != null) {
-            $currentChar = $this->getCurrentChar();
-            // dump(['i' => $i, 'pos' => $this->position, 'char' => $currentChar]);
+            if (! $currentChar = $this->getCurrentChar()) {
+                break;
+            }
 
-            if ($currentChar == ' ') {
+            if ($currentChar == ' ' || $currentChar == PHP_EOL) {
                 $this->skipWhitespace();
                 continue;
             }
@@ -204,12 +206,6 @@ class Lexer
                 return new Token(Token::SEMICOLON, $currentChar);
             }
 
-            if ($currentChar == '.') {
-                $this->advance();
-
-                return new Token(Token::DOT, $currentChar);
-            }
-
             if (\in_array($currentChar, \array_keys($this->operators))) {
                 $this->advance();
 
@@ -220,6 +216,12 @@ class Lexer
                 $this->advance();
 
                 return new Token($this->parenthesis[$currentChar], $currentChar);
+            }
+
+            if ($currentChar == '.') {
+                $this->advance();
+
+                return new Token(Token::DOT, $currentChar);
             }
 
             $this->error($currentChar);
@@ -242,22 +244,13 @@ class Lexer
         return $this->code[$this->position];
     }
 
-    protected function getLineNumber()
+    /**
+     * Returns the position for the current pointer of the code.
+     *
+     * @return Position
+     */
+    public function getPosition(): Position
     {
-        $position = $this->position;
-        $currentLine = 1;
-        $lines = \explode(PHP_EOL, $this->code);
-
-        foreach ($lines as $line) {
-            $length = \strlen($line);
-            if ($position > $length) {
-                $position -= $length;
-                $currentLine++;
-            }
-
-            continue;
-        }
-
-        return $currentLine;
+        return new Position($this->code, $this->position);
     }
 }

@@ -13,6 +13,9 @@ class Token
     const LEFT_PARENTHESIS = 'LEFT_PARENTHESIS';
     const RIGHT_PARENTHESIS = 'RIGHT_PARENTHESIS';
     const ASSIGNMENT = ':=';
+    const ID = 'ID';
+    const BEGIN = 'BEGIN';
+    const END = 'END';
     const SEMICOLON = ';';
     const DOT = '.';
     const EOF = 'EOF';

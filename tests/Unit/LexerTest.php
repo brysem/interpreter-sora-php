@@ -49,7 +49,21 @@ class LexerTest extends TestCase
     {
         $lexer = new Lexer('BEGIN a := 2; END.');
         $this->assertToken($lexer, new Token('BEGIN', 'BEGIN'));
-        $this->assertToken($lexer, new Token('ID', 'a'));
+        $this->assertToken($lexer, new Token(Token::ID, 'a'));
+        $this->assertToken($lexer, new Token(Token::ASSIGNMENT, ':='));
+        $this->assertToken($lexer, new Token(Token::INTEGER, 2));
+        $this->assertToken($lexer, new Token(Token::SEMICOLON, ';'));
+        $this->assertToken($lexer, new Token('END', 'END'));
+        $this->assertToken($lexer, new Token(Token::DOT, '.'));
+    }
+
+    public function testVariableAssignmentWithNewLinesToken()
+    {
+        $lexer = new Lexer('BEGIN'. PHP_EOL .
+                                'a := 2;'. PHP_EOL .
+                            'END.'. PHP_EOL);
+        $this->assertToken($lexer, new Token('BEGIN', 'BEGIN'));
+        $this->assertToken($lexer, new Token(Token::ID, 'a'));
         $this->assertToken($lexer, new Token(Token::ASSIGNMENT, ':='));
         $this->assertToken($lexer, new Token(Token::INTEGER, 2));
         $this->assertToken($lexer, new Token(Token::SEMICOLON, ';'));
